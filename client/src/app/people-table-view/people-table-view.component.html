@@ -6,6 +6,7 @@
         <tr>
             <th>Nome</th>
             <th>E-mail</th>
+            <th>Localidade</th>
         </tr>
     </ng-template>
     <ng-template pTemplate="body" let-pessoa>
@@ -17,6 +18,11 @@
             <td>
                 <span style="vertical-align: middle; margin-left: .5em">{{pessoa.email}}</span>
             </td>
+
+            <td>
+                <span style="vertical-align: middle; margin-left: .5em">{{pessoa.localidade}}</span>
+            </td>
+            
         </tr>
     </ng-template>
 
