@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PeopleTableViewComponent } from './people-table-view/people-table-view.component';
 import {TableModule} from 'primeng/table';
+import {ButtonModule} from 'primeng/button';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import {TableModule} from 'primeng/table';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    TableModule
+    TableModule,
+    ButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

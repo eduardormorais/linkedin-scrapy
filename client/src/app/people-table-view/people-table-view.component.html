@@ -1,34 +1,70 @@
-<p-table [value] = "pessoas">
-    <ng-template pTemplate="caption">
-        Pessoas
-    </ng-template>
-    <ng-template pTemplate="header">
-        <tr>
-            <th>Nome</th>
-            <th>E-mail</th>
-            <th>Localidade</th>
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-pessoa>
-        <tr class="ui-selectable-row">
-            <td>
-                <img [alt]="pessoa.name" src="assets/images/{{pessoa.image}}" width="32" style="vertical-align: middle" />
-                <span style="vertical-align: middle; margin-left: .5em">{{pessoa.name}}</span>
-            </td>
-            <td>
-                <span style="vertical-align: middle; margin-left: .5em">{{pessoa.email}}</span>
-            </td>
+<div class="ui-g-12">
 
-            <td>
-                <span style="vertical-align: middle; margin-left: .5em">{{pessoa.localidade}}</span>
-            </td>
-            
-        </tr>
-    </ng-template>
+    <div class="ui-g-10" >
+        <span class="ui-float-label" style="float: right; margin-top: 1%;">
+            <input id="float-input" type="text" size="30" pInputText> 
+            <label for="float-input">Pesquisa no Linkedin</label>
+        </span>
 
-    <ng-template pTemplate="emptymessage">
-        <tr>
-            <td colspan="8" style="text-align:left">Pessoas não encontradas.</td>
-        </tr>
-    </ng-template>
-</p-table>
+    </div>
+
+    <div class="ui-g-2">
+        
+        <p-button [style]="{'width': '150px'}" icon="pi pi-search" label="Pesquisar"></p-button>
+    </div>
+
+
+</div>
+
+<div class="ui-g-12" style="margin-top: 2%;">
+
+
+    <p-table #dt [value] = "pessoas" dataKey="id" styleClass="ui-table-customers" [rowHover]="true"
+    [rows]="5" [showCurrentPageReport]="true" [rowsPerPageOptions]="[5,10,25,50]"
+    [paginator]="true" currentPageReportTemplate="{last} de {totalRecords} pessoas"
+    [filterDelay]="0" [globalFilterFields]="['name','country.name','representative.name','status']">
+    
+        <ng-template pTemplate="caption">
+            Pessoas
+            <div class="ui-table-globalfilter-container">
+                <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Pesquisa Global" />
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="name">Nome <p-sortIcon field="name"></p-sortIcon></th> 
+                <th pSortableColumn="cargo">Cargo <p-sortIcon field="cargo"></p-sortIcon></th> 
+                <th pSortableColumn="email">E-mail <p-sortIcon field="email"></p-sortIcon></th> 
+                <th pSortableColumn="localidade">Localidade <p-sortIcon field="localidade"></p-sortIcon></th> 
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-pessoa>
+            <tr class="ui-selectable-row">
+                <td>
+                    <img [alt]="pessoa.name" src="assets/images/{{pessoa.image}}" width="32" style="vertical-align: middle" />
+                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.name}}</span>
+                </td>
+                
+                <td>
+                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.cargo}}</span>
+                </td>
+    
+                <td>
+                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.email}}</span>
+                </td>
+    
+                <td>
+                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.localidade}}</span>
+                </td>
+                
+            </tr>
+        </ng-template>
+    
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td  style="width: 100%; height: 100%;" colspan="8" style="text-align:left">Pessoas não encontradas.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
