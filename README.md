@@ -7,7 +7,7 @@
 
 #### Run
 ```
-cd cliente && npm serve
+cd cliente && ng serve
 ```
 
 ## Scraping
