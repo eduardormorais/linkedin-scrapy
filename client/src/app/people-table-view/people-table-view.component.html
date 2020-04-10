@@ -1,0 +1,28 @@
+<p-table [value] = "pessoas">
+    <ng-template pTemplate="caption">
+        Pessoas
+    </ng-template>
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-pessoa>
+        <tr class="ui-selectable-row">
+            <td>
+                <img [alt]="pessoa.name" src="assets/images/{{pessoa.image}}" width="32" style="vertical-align: middle" />
+                <span style="vertical-align: middle; margin-left: .5em">{{pessoa.name}}</span>
+            </td>
+            <td>
+                <span style="vertical-align: middle; margin-left: .5em">{{pessoa.email}}</span>
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="8" style="text-align:left">Pessoas não encontradas.</td>
+        </tr>
+    </ng-template>
+</p-table>
