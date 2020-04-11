@@ -14,8 +14,9 @@ class Linkedin(Spider):
     name = 'linkedin'
     start_urls = [os.environ['URL_LOGIN']]
     
-    def __init__(self, email='',  password='',value_search='', **kwargs):
+    def __init__(self, email='',  password='',value_search='',output_file='', **kwargs):
         self.value_search = value_search
+        self.output_file = output_file
         self.EMAIL = email
         self.PASSWORD = password
         super().__init__(**kwargs)
@@ -29,9 +30,14 @@ class Linkedin(Spider):
         yield Request(url=os.environ['URL_SEARCH'], callback = self.search)
         
     def search(self, response):
-        print(response.css('div ').getall())
+        os.makedirs("files", exist_ok=True) 
+        f = open(f"files/{self.output_file}", "w")
+        for resp in response.css('div').getall():
+            text = resp.encode('utf-8')
+            f.write(str(text))
+        f.close()
         
-       
+        
     #Ideia a principio 
     def update_filter(self):
         payload = [{"filters":["geoRegion->br:0|br:6368",
