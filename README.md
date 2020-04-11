@@ -17,5 +17,5 @@ cd cliente && ng serve
 
 #### Run
 ```
-scrapy runspider scraping.py -a value_search="Teste Teste" -a email="you@email.com" -a password="youpassword" 
+python subprocesScraping.py
 ```
