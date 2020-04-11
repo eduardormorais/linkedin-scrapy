@@ -7,7 +7,7 @@
 
 #### Run
 ```
-cd cliente && ng serve
+ng serve
 ```
 
 ## Scraping
@@ -17,5 +17,5 @@ cd cliente && ng serve
 
 #### Run
 ```
-python subprocesScraping.py
+python app.py
 ```
