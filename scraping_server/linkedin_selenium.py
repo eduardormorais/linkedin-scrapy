@@ -21,8 +21,8 @@ class LinkedinSelenium(Resource):
         driver.get(self.login_url)
         username = driver.find_element_by_name("session_key")
         password = driver.find_element_by_name("session_password")
-        username.send_keys("edu-eduardo99@hotmail.com")
-        password.send_keys("Asdf12133")
+        username.send_keys(os.environ['email'])
+        password.send_keys(os.environ['senha'])
         button_login = driver.find_elements_by_xpath(
             "//button[@type='submit']")[0]
         button_login.click()
