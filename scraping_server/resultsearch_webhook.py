@@ -7,7 +7,7 @@ import os
 
 class ResultSearchWebHook(Resource):
     
-    def post(self):
+    def get(self):
         try:
             file_name = request.args.get('fileName')
             print(f"File --> {file_name}")
@@ -25,8 +25,10 @@ class ResultSearchWebHook(Resource):
         return os.path.exists(f"files/{file_name}")
     
     def get_file(self, file_name):
-        f = open(f"files/{file_name}", "r")
-        return f.read()        
+        with open(f"files/{file_name}", "r") as arquivo_resultado:
+            resultado = json.load(arquivo_resultado)
+
+        return resultado 
               
 # if __name__ == "__main__":
 #     f = open("files/request-c5ae3401c99d42fda8c0bec40e4f78cb.txt", "r")

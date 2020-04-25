@@ -14,7 +14,8 @@ parser.add_argument("--o", default=None, type=str, help="Arquivo para salvar dad
 args = parser.parse_args()
 valor_pesquisa = json.loads(args.v)
 arquivo_output = args.o
-linkedin_selenium = LinkedinSelenium(arquivo_output)
+linkedin_selenium = LinkedinSelenium()
+linkedin_selenium.set_output_file(arquivo_output)
 linkedin_selenium.start_searching(valor_pesquisa)
 
 

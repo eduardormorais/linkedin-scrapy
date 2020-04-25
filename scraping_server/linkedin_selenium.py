@@ -10,12 +10,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 class LinkedinSelenium(Resource):
-    def __init__(self, output_file):
+    def __init__(self):
         self.login_url = "https://www.linkedin.com/login"
         self.chrome_options = Options()
         self.chrome_options.add_argument("--headless")
         self.chrome_driver_path = "./chromedriver"
-        self.output_file = output_file
 
     def sign_in(self, driver):
         driver.get(self.login_url)
@@ -37,6 +36,9 @@ class LinkedinSelenium(Resource):
             cookies = json.load(cookie_file)
 
         return cookies
+    
+    def set_output_file(self, output_file):
+        self.output_file = output_file
 
     def start_searching(self, valor_pesquisa):
         url_filter_generator = UrlFilterGenerator()
@@ -79,9 +81,9 @@ class LinkedinSelenium(Resource):
         for user_url in users_url:
             driver.get(user_url)
             user_profile = self.get_profile_data(driver.page_source)
-            self.create_email(user_profile)
             array_users_profile.append(user_profile)
         driver.close()
+        self.create_email(array_users_profile)
         print(array_users_profile)
         self.save_search_result(array_users_profile)
 
@@ -117,13 +119,14 @@ class LinkedinSelenium(Resource):
             return False
         return True
     
-    def create_email(self, user_profile):
-        company_name = user_profile['empresa']
-        user_first_name = user_profile['primeiroNome']
-        compound_company_name = company_name.split(' ')
-        if len(compound_company_name) > 1:
-            company_name = compound_company_name[0]
-        user_profile['email'] = f"{user_profile['primeiroNome'].lower()}@gmail.com"
+    def create_email(self, users_profile):
+        for user_profile in users_profile:
+            company_name = user_profile['empresa']
+            user_first_name = user_profile['primeiroNome']
+            compound_company_name = company_name.split(' ')
+            if len(compound_company_name) > 1:
+                company_name = compound_company_name[0]
+            user_profile['email'] = f"{user_profile['primeiroNome'].lower()}@gmail.com"
     
     def save_search_result(self, search_response):
         print('Pesquisa finalizando, salvando conteúdo em arquivo.')
