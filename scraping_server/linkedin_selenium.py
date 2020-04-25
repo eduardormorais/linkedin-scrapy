@@ -76,7 +76,6 @@ class LinkedinSelenium(Resource):
 
     def get_profiles_info_from_users(self, users_url, driver):
         array_users_profile = []
-        users_url = ['https://www.linkedin.com/in/luana-gabriela-a058061a']
         for user_url in users_url:
             driver.get(user_url)
             user_profile = self.get_profile_data(driver.page_source)
