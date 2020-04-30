@@ -4,16 +4,20 @@
 #### Dependencies 
   - Node: 10.18.1 
   - AngularCLI: 9.1.1 
-
+  - Primeng: 9.0.5
 #### Run
 ```
-ng serve
+npm install
+npm start
 ```
 
 ## Scraping
 #### Dependencies 
   - Python: 3.7.6 
-  - Scrapy: 2.0.1
+  - Selenium: 3.141.0
+  - Beautifulsoup: 4.9.0
+  - Flask: 1.1.2
+  - Flask-RESTful: 0.3.8
 
 #### Run
 ```
