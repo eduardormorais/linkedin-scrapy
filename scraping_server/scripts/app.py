@@ -6,6 +6,7 @@ from os import path
 from resultsearch_webhook import ResultSearchWebHook
 from linkedin_selenium import LinkedinSelenium
 from subprocess_browser import SubprocessWebHook
+from setores_webhook import SetoresWebHook
 import json, os
 
 app = Flask(__name__)
@@ -20,6 +21,8 @@ if path.exists('cookies.json') is not True:
 
 api.add_resource(ResultSearchWebHook, '/api/resultado/')
 api.add_resource(SubprocessWebHook, '/api/pesquisa/')
+api.add_resource(SetoresWebHook, '/api/setores/')
+
 
 if __name__ == '__main__':
     app.run(host= '0.0.0.0')
