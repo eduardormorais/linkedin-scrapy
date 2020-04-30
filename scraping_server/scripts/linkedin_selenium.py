@@ -9,6 +9,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
+os.environ['email'] = 'tguzenski@yahoo.com.br'
+os.environ['senha'] = 'Eagorajose?'
+
 class LinkedinSelenium(Resource):
     def __init__(self):
         self.login_url = "https://www.linkedin.com/login"

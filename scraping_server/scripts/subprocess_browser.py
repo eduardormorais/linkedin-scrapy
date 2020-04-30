@@ -11,11 +11,12 @@ import uuid
 class SubprocessWebHook(Resource):
     def post(self):
         try:
-            value_search = json.dumps(request.json)
+            value_search = dict(cargo = request.form['cargo'],
+                                localidade = request.form['localidade'],
+                                setores = request.form.getlist('setores'))
             print("Dados de pesquisa recebidos: {}".format(value_search))
             file_name = f"request-{uuid.uuid4().hex}.json"
-            print("Nome do arquivo de output: {}".format(file_name))
-            self.startSubprocess(f"python3.6 linkedin_spider.py --v '{value_search}' --o {file_name}")
+            self.startSubprocess(f"python3.6 linkedin_spider.py --v '{json.dumps(value_search)}' --o {file_name}")
             return file_name
         except Exception as excs:
             print(excs)

@@ -1,7 +1,4 @@
 import os
-from scrapy.http import FormRequest, Request, Response
-from scrapy.crawler import CrawlerProcess
-from scrapy import Spider
 from bs4 import BeautifulSoup
 import argparse
 import json

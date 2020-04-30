@@ -76,28 +76,34 @@
         }
 
         &:first-child {
-            width: 15em;
+            width: 10em;
             text-align: center;
+            font-size:1vw;
         }
 
         &:last-child {
-            width: 10em;
+            width: 16em;
             text-align: center;
+            font-size:1vw;
         }
     }
 
     .ui-table-tbody > tr > td {
         border: 0 none;
         cursor: auto;
-
+        text-align: center;
+        
         &:first-child {
             width: 3em;
-            text-align: left;
+            text-align: center;
+            font-size:1vw;
+
         }
 
         &:last-child {
-            width: 10em;
+            width: 5em;
             text-align: center;
+            font-size:1vw;
         }
     }
 
@@ -138,4 +144,16 @@
             }
         }
     }
+}
+
+:host ::ng-deep .ui-listbox{
+    width: 100%;
+}
+
+:host ::ng-deep.ui-float-label>input:focus~label,
+:host ::ng-deep.ui-float-label>input.ui-state-filled~label,
+:host ::ng-deep.ui-float-label>.ui-inputwrapper-focus~label,
+:host ::ng-deep.ui-float-label>.ui-inputwrapper-filled~label {
+    top: -.75em;
+    font-size: 12px;
 }

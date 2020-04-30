@@ -1,29 +1,40 @@
 <div class="ui-g-12">
-
-    <div class="ui-g-10" >
-        <span class="ui-float-label" style="float: right; margin-top: 1%;">
-            <input id="float-input" type="text" size="30" pInputText> 
-            <label for="float-input">Pesquisa no Linkedin</label>
-        </span>
-
+    <div class="ui-g-12">
+        <div class="ui-g-4" >
+            <span class="ui-float-label">
+                <input [(ngModel)]="pesquisa.cargo" id="float-input" type="text" size="30" pInputText> 
+                <label for="float-input">Cargo</label>
+            </span>
+        </div>      
+        <div class="ui-g-4" >
+            <span class="ui-float-label" style="float: right;">
+                <input [(ngModel)]="pesquisa.localidade" id="float-input" type="text" size="30" pInputText> 
+                <label for="float-input">Localidade</label>
+            </span>
+        </div>  
+        <div class="ui-g-4" >
+            <p-button [disabled]="atualizar" (click)="pesquisar()" [style]="{'width': '250px', 'margin-left' : '15%'}" icon="pi pi-search" label="Pesquisar"></p-button>
+        </div>
     </div>
-
-    <div class="ui-g-2">
-        
-        <p-button [style]="{'width': '150px'}" icon="pi pi-search" label="Pesquisar"></p-button>
+    <div class="ui-g-12">
+        <p-listbox [listStyle]="{'max-height':'100px'}" [options]="setores" [(ngModel)]="pesquisa.setores" [multiple]="true" [checkbox]="true"  filter="filter" optionLabel="nome">
+            <p-header>
+                Setores
+            </p-header>
+        </p-listbox>
     </div>
-
-
 </div>
 
-<div class="ui-g-12" style="margin-top: 2%;">
+<div class="ui-g-12" *ngIf="atualizar">
+    <h3 style="margin-left: 32%;">Pesquisando pessoas no Linkedin</h3>
+    <i class="pi pi-spin pi-spinner" style="font-size: 3em; margin-left: 45%;"></i>
+</div>
 
-
+<div class="ui-g-12" style="margin-top: 2%; width: 100%;" *ngIf="pessoas">
     <p-table #dt [value] = "pessoas" dataKey="id" styleClass="ui-table-customers" [rowHover]="true"
     [rows]="5" [showCurrentPageReport]="true" [rowsPerPageOptions]="[5,10,25,50]"
     [paginator]="true" currentPageReportTemplate="{last} de {totalRecords} pessoas"
-    [filterDelay]="0" [globalFilterFields]="['name','country.name','representative.name','status']">
-    
+    [filterDelay]="0" [globalFilterFields]="['primeiroNome','sobrenome','cargo','empresa','email']">
         <ng-template pTemplate="caption">
             Pessoas
             <div class="ui-table-globalfilter-container">
@@ -32,31 +43,31 @@
         </ng-template>
         <ng-template pTemplate="header">
             <tr>
-                <th pSortableColumn="name">Nome <p-sortIcon field="name"></p-sortIcon></th> 
+                <th pSortableColumn="primeiroNome">Nome <p-sortIcon field="primeiroNome"></p-sortIcon></th> 
+                <th pSortableColumn="sobrenome">Sobrenome <p-sortIcon field="sobrenome"></p-sortIcon></th> 
                 <th pSortableColumn="cargo">Cargo <p-sortIcon field="cargo"></p-sortIcon></th> 
+                <th pSortableColumn="empresa">Empresa <p-sortIcon field="empresa"></p-sortIcon></th> 
                 <th pSortableColumn="email">E-mail <p-sortIcon field="email"></p-sortIcon></th> 
-                <th pSortableColumn="localidade">Localidade <p-sortIcon field="localidade"></p-sortIcon></th> 
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-pessoa>
             <tr class="ui-selectable-row">
                 <td>
-                    <img [alt]="pessoa.name" src="assets/images/{{pessoa.image}}" width="32" style="vertical-align: middle" />
-                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.name}}</span>
+                    <!-- <img [alt]="pessoa.name" src="assets/images/{{pessoa.image}}" width="32" style="vertical-align: middle" /> -->
+                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.primeiroNome}}</span>
                 </td>
-                
+                <td>
+                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.sobrenome}}</span>
+                </td>
                 <td>
                     <span style="vertical-align: middle; margin-left: .5em">{{pessoa.cargo}}</span>
+                </td>                
+                <td>
+                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.empresa}}</span>
                 </td>
-    
                 <td>
                     <span style="vertical-align: middle; margin-left: .5em">{{pessoa.email}}</span>
                 </td>
-    
-                <td>
-                    <span style="vertical-align: middle; margin-left: .5em">{{pessoa.localidade}}</span>
-                </td>
-                
             </tr>
         </ng-template>
     
