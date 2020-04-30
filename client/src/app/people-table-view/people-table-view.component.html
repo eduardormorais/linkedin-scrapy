@@ -1,19 +1,25 @@
 <div class="ui-g-12">
     <div class="ui-g-12">
-        <div class="ui-g-4" >
+        <div class="ui-g-3" >
             <span class="ui-float-label">
-                <input [(ngModel)]="pesquisa.cargo" id="float-input" type="text" size="30" pInputText> 
+                <input style="width: 97%;"[(ngModel)]="pesquisa.cargo" id="float-input" type="text" size="30" pInputText> 
                 <label for="float-input">Cargo</label>
             </span>
         </div>      
-        <div class="ui-g-4" >
+        <div class="ui-g-3" >
             <span class="ui-float-label" style="float: right;">
-                <input [(ngModel)]="pesquisa.localidade" id="float-input" type="text" size="30" pInputText> 
+                <input style="width: 95%;" [(ngModel)]="pesquisa.localidade" id="float-input" type="text" size="30" pInputText> 
                 <label for="float-input">Localidade</label>
             </span>
         </div>  
-        <div class="ui-g-4" >
-            <p-button [disabled]="atualizar" (click)="pesquisar()" [style]="{'width': '250px', 'margin-left' : '15%'}" icon="pi pi-search" label="Pesquisar"></p-button>
+        <div class="ui-g-3" >
+            <span class="ui-float-label" style="float: right;">
+                <p-spinner size="20" [(ngModel)]="pesquisa.qtd" [step]="10"></p-spinner>
+                <label for="float-input">Quatidade a pesquisar</label>
+            </span>
+        </div> 
+        <div class="ui-g-3" >
+            <p-button [disabled]="atualizar" (click)="pesquisar()" [style]="{'width': '215px', 'margin-left' : '0%'}" icon="pi pi-search" label="Pesquisar"></p-button>
         </div>
     </div>
     <div class="ui-g-12">
@@ -38,7 +44,7 @@
         <ng-template pTemplate="caption">
             Pessoas
             <div class="ui-table-globalfilter-container">
-                <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Pesquisa Global" />
+                <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Filtrar" />
             </div>
         </ng-template>
         <ng-template pTemplate="header">

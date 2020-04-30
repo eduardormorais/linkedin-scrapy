@@ -11,9 +11,10 @@ import uuid
 class SubprocessWebHook(Resource):
     def post(self):
         try:
-            value_search = dict(cargo = request.form['cargo'],
-                                localidade = request.form['localidade'],
-                                setores = request.form.getlist('setores'))
+            value_search = dict(cargo = str(request.form['cargo']),
+                                localidade = str(request.form['localidade']),
+                                qtd = int(request.form['qtd']),                                
+                                setores = list(request.form.getlist('setores')))
             print("Dados de pesquisa recebidos: {}".format(value_search))
             file_name = f"request-{uuid.uuid4().hex}.json"
             self.startSubprocess(f"python3.6 linkedin_spider.py --v '{json.dumps(value_search)}' --o {file_name}")
