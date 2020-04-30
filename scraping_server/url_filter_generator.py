@@ -4,7 +4,7 @@ import json
 class UrlFilterGenerator():
     def __init__(self):
         print('Iniciando gerador de url...')
-        self.url_to_filter = 'https://www.linkedin.com/search/results/people/?'
+        self.url_to_filter = 'http://linkedin.com/sales/search/people?'
     
     def create_url(self, data):
         #Origins:

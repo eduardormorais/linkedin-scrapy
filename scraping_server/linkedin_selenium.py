@@ -81,10 +81,11 @@ class LinkedinSelenium(Resource):
         for user_url in users_url:
             driver.get(user_url)
             user_profile = self.get_profile_data(driver.page_source)
-            array_users_profile.append(user_profile)
+            if user_profile['empregado'] is True:
+                array_users_profile.append(user_profile)
         driver.close()
-        self.create_email(array_users_profile)
         print(array_users_profile)
+        self.create_email(array_users_profile)
         self.save_search_result(array_users_profile)
 
     def get_profile_data(self, html_page):
@@ -92,6 +93,7 @@ class LinkedinSelenium(Resource):
         included_elements_user = {}
         required_elements_json = ['included', 'firstName', 'lastName', 'dateRange']
         beautiful_soup = BeautifulSoup(html_page)
+        print(beautiful_soup.prettify())
         tags_code = beautiful_soup.find_all('code')
         for tag_code in tags_code:
             if self.is_json(tag_code.text) == True:
@@ -99,13 +101,15 @@ class LinkedinSelenium(Resource):
                 if all(tag_element in str(data_tag_code) for tag_element in required_elements_json):
                     included_elements_user = data_tag_code['included']
                     break
-
+        
+        profile_data['empregado'] = False
         for included_element in included_elements_user:
             if 'dateRange' in included_element:
                 if 'end' not in included_element['dateRange'] and 'title' in included_element and 'companyName' in included_element:
                     profile_data['empresa'] = included_element['companyName']
                     profile_data['cargo'] = included_element['title']
-
+                    profile_data['empregado'] = True
+            
             if 'firstName' in included_element:
                 profile_data['primeiroNome'] = included_element['firstName']
                 profile_data['sobrenome'] = included_element['lastName']
@@ -121,12 +125,22 @@ class LinkedinSelenium(Resource):
     
     def create_email(self, users_profile):
         for user_profile in users_profile:
-            company_name = user_profile['empresa']
-            user_first_name = user_profile['primeiroNome']
-            compound_company_name = company_name.split(' ')
-            if len(compound_company_name) > 1:
-                company_name = compound_company_name[0]
-            user_profile['email'] = f"{user_profile['primeiroNome'].lower()}@gmail.com"
+            company_name = user_profile['empresa'].split(' ')
+            user_first_name = user_profile['primeiroNome'].split(' ')
+            user_last_name = user_profile['sobrenome'].split(' ')
+
+            if len(company_name) >= 1:
+                company_name = company_name[0].lower()
+            
+            if len(user_first_name) >= 1:
+                user_first_name = user_first_name[0].lower()
+            
+            if len(user_last_name) >= 1:
+                user_last_name = user_last_name[0].lower()
+            
+            
+            email = "{}.{}@{}.com".format(user_first_name, user_last_name, company_name)
+            user_profile['email'] = email
     
     def save_search_result(self, search_response):
         print('Pesquisa finalizando, salvando conteúdo em arquivo.')
