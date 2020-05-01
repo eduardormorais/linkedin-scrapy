@@ -76,7 +76,7 @@ class LinkedinSelenium(Resource):
                         break
             
             for user_element in users_elements:
-                if len(profile_users) == int(valor_pesquisa['qtd']):
+                if len(profile_users) == (valor_pesquisa['qtd']):
                     next_page_number = fixed_number_of_pages
                     break
 
