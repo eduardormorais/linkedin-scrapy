@@ -11,8 +11,8 @@ import uuid
 class SubprocessWebHook(Resource):
     def post(self):
         try:
-            value_search = dict(cargo = request.form['cargo'],
-                                localidade = request.form['localidade'],
+            value_search = dict(cargo = request.form.get('cargo'),
+                                localidade = request.form.get('localidade'),
                                 setores = request.form.getlist('setores'))
             print("Dados de pesquisa recebidos: {}".format(value_search))
             file_name = f"request-{uuid.uuid4().hex}.json"

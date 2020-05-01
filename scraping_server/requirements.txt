@@ -1,4 +1,5 @@
 flask 
-flask_restful
+flask-restful
 selenium
 beautifulsoup4
+tldextract

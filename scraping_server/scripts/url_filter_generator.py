@@ -1,10 +1,12 @@
 import urllib
+from urllib.parse import urlparse
 import json
+import tldextract
 
 class UrlFilterGenerator():
     def __init__(self):
         print('Iniciando gerador de url...')
-        self.url_to_filter = 'http://linkedin.com/sales/search/people?'
+        self.url_to_filter = 'http://linkedin.com/search/results/people?'
     
     def create_url(self, data):
         #Origins:
@@ -41,6 +43,14 @@ class UrlFilterGenerator():
             setores_ids = json.load(all_setores_ids)
         
         return setores_ids
+    
+    def get_domain(self, url, remove_http=True):
+        url_info = tldextract.extract(url)
+        domain_info = '@{}.{}'.format(url_info.domain, url_info.suffix)
+        
+        return domain_info
+
+        
     
 
         
