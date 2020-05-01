@@ -15,6 +15,7 @@ export class PeopleTableViewService {
     let formData: FormData = new FormData();
     formData.append('localidade', pesquisa.localidade)
     formData.append('cargo', pesquisa.cargo)
+    formData.append('qtd', pesquisa.qtd.toString())
     for(let setor of pesquisa.setores){
       formData.append('setores', setor.nome)
     }

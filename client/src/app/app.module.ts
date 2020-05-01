@@ -10,6 +10,7 @@ import {ListboxModule} from 'primeng/listbox';
 import { HttpClientModule } from '@angular/common/http';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {InputTextModule} from 'primeng/inputtext';
+import {SpinnerModule} from 'primeng/spinner';
 
 @NgModule({
   declarations: [
@@ -25,7 +26,8 @@ import {InputTextModule} from 'primeng/inputtext';
     FormsModule,
     ReactiveFormsModule,
     InputTextModule,
-    ListboxModule
+    ListboxModule,
+    SpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
