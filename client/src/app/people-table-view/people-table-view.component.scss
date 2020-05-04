@@ -2,7 +2,7 @@
 :host ::ng-deep .ui-table-customers {
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
 
-    
+
     .flag {
         vertical-align: middle;
         width: 30px;
@@ -20,7 +20,7 @@
 
         span {
             margin-top: .125em;
-            vertical-align: middle; 
+            vertical-align: middle;
             margin-left: .5em
         }
     }
@@ -29,7 +29,7 @@
         .ui-dropdown {
             float: left;
         }
-    
+
         .ui-paginator-current {
             float: right;
         }
@@ -44,10 +44,10 @@
         }
     }
 
-    
+
     .ui-datepicker {
         min-width: 25em;
-    
+
         td {
             font-weight: 400;
         }
@@ -78,13 +78,13 @@
         &:first-child {
             width: 10em;
             text-align: center;
-            font-size:1vw;
+            font-size:0.8vw;
         }
 
         &:last-child {
             width: 16em;
             text-align: center;
-            font-size:1vw;
+            font-size:0.8vw;
         }
     }
 
@@ -92,18 +92,19 @@
         border: 0 none;
         cursor: auto;
         text-align: center;
-        
+
         &:first-child {
             width: 3em;
             text-align: center;
-            font-size:1vw;
+            font-size:0.8vw;
 
         }
 
         &:last-child {
             width: 5em;
             text-align: center;
-            font-size:1vw;
+            font-size:0.8vw;
+            overflow:hidden;
         }
     }
 
@@ -156,4 +157,30 @@
 :host ::ng-deep.ui-float-label>.ui-inputwrapper-filled~label {
     top: -.75em;
     font-size: 12px;
+}
+
+.customer-badge {
+  padding: .25em .5em;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .3px;
+  text-align: center;
+
+
+  &.status-Valid {
+      background-color: #C8E6C9;
+      color: #256029;
+  }
+
+  &.status-Catch-All {
+      background-color: #73D2FF;
+      color: #2A369B;
+  }
+
+  &.status-Invalid {
+      background-color: #FFCDD2;
+      color: #C63737;
+  }
+
 }
