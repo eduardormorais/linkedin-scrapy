@@ -68,7 +68,6 @@ class LinkedinSelenium(Resource):
         users_elements = []
         required_elements_json = ['included', 'navigationUrl', 'trackingUrn']
         while next_page_number <= fixed_number_of_pages: # Número de páginas que o script irá percorrer.
-            print('\n\npassando pela página: {}'.format(next_page_number))
             chrome_driver.get(search_url)
             beautiful_soup = BeautifulSoup(chrome_driver.page_source)
             search_page_tags_code = beautiful_soup.find_all("code")
@@ -78,41 +77,45 @@ class LinkedinSelenium(Resource):
                     if all(tag_element in str(search_data_tag_code) for tag_element in required_elements_json):
                         for elements_json in search_data_tag_code['data']['elements']:
                             if 'targetUrn' in str(elements_json):
-                                print('\nTargetURN encontrado!!')
                                 users_elements = elements_json['elements']
                                 break
                         break
+                    
+            if len(users_elements) == 0: break
             
             for user_element in users_elements:
-                print('\nLoop por cada elemento de usuário...')
                 if len(profile_users) == (valor_pesquisa['qtd']):
                     next_page_number = fixed_number_of_pages
                     break
 
                 chrome_driver.get(user_element['navigationUrl'])
                 profile_user = self.get_profile_data(chrome_driver.page_source)
+                
+                if self.repeated_user(profile_users, profile_user) is True:
+                    next_page_number = fixed_number_of_pages
+                    break
+
                 if profile_user['empregado'] is True:
-                    print('\nUsário está empregado!')
                     chrome_driver.get(profile_user['empresa_linkedin_url'])
                     company_website_url = self.get_company_url(chrome_driver.page_source)
                     if company_website_url is not None:
                         profile_user['dominio_empresa'] = self.url_filter_generator.get_domain(company_website_url)
-                        self.create_fake_mail(profile_user)
-                        # self.create_email(profile_user)
+                        self.create_email(profile_user)
                         profile_users.append(profile_user)
 
             next_page_number += 1
             search_url = self.url_filter_generator.next_page(main_search_url, next_page_number)
-
-        print(profile_users)
         chrome_driver.close()
         self.save_search_result(profile_users)
     
-    def create_fake_mail(self, profile_user):
-        first_name = unidecode.unidecode(profile_user['primeiroNome'].split(' ')[0].lower())
-        last_name = unidecode.unidecode(profile_user['sobrenome'].split(' ')[0].lower())
-        profile_user['email'] = '{}.{}{}'.format(first_name, last_name, profile_user['dominio_empresa'])
+    def repeated_user(self, profile_users, new_user):
+        repeated_user = False
+        for profile_user in profile_users:
+            if new_user['primeiroNome'] == profile_user['primeiroNome'] and new_user['sobrenome'] == profile_user['sobrenome']:
+                repeated_user = True
+                break
 
+        return repeated_user
 
     def get_profile_data(self, html_page):
         profile_data = {}
@@ -145,7 +148,8 @@ class LinkedinSelenium(Resource):
             if all(tag_element in (included_element) for tag_element in required_company_elements):
                 if included_element['entityUrn'] == company_urn:
                     profile_data['empresa_linkedin_url'] = included_element['url']
-                    
+            
+        print("\nProfile user: {}".format(profile_data))
         return profile_data
     
     def get_company_url(self, company_page):
@@ -176,19 +180,22 @@ class LinkedinSelenium(Resource):
     
     def create_email(self, user_profile):
         email_address = ''
-        name_variations = self.create_name_variations(user_profile)
+        name_variations = self.create_name_variations(user_profile)   
         for name_variation in name_variations:
             email_address = (name_variation + user_profile['dominio_empresa'])
-            if self.connect_to_zerobounce(email_address) == "valid":
-                user_profile['email'] = email_address
+            response_email_status = self.connect_to_zerobounce(email_address)
+            user_profile['email'] = email_address
+            user_profile['email_status'] = response_email_status['status']
+            if response_email_status['status'] == "valid":
                 break
+
 
     def connect_to_zerobounce(self, email):
         url = "https://api.zerobounce.net/v2/validate"
         params = {"email": email, "api_key": os.environ['api_key_zerobounce'], "ip_address": ''}
         json_response = json.loads(requests.get(url, params=params).content)
         print("\nEmail: {}.\nStatus: {}".format(email, json_response['status']))
-        return json_response['status']
+        return json_response
 
     def save_search_result(self, search_response):
         print('Pesquisa finalizando, salvando conteúdo em arquivo.')
@@ -202,15 +209,15 @@ class LinkedinSelenium(Resource):
         last_name = unidecode.unidecode(user_profile['sobrenome'].split(' ')[0].lower())
 
         name_variations.append('{}'.format(first_name))
-        name_variations.append('{}.{}'.format(first_name, last_name))
-        name_variations.append('{}_{}'.format(first_name, last_name))
-        name_variations.append('{}{}'.format(first_name, last_name))
         name_variations.append('{}{}'.format(first_name[0], last_name))
         name_variations.append('{}.{}'.format(first_name[0], last_name))
         name_variations.append('{}_{}'.format(first_name[0], last_name))
         name_variations.append('{}{}'.format(first_name, last_name[0]))
         name_variations.append('{}.{}'.format(first_name[0], last_name[0]))
         name_variations.append('{}.{}'.format(first_name[0], last_name[0]))
+        name_variations.append('{}{}'.format(first_name, last_name))
+        name_variations.append('{}_{}'.format(first_name, last_name))
+        name_variations.append('{}.{}'.format(first_name, last_name))
 
         return name_variations
 

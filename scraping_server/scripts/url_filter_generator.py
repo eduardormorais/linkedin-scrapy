@@ -5,7 +5,7 @@ import tldextract
 
 class UrlFilterGenerator():
     def __init__(self):
-        self.url_to_filter = 'http://linkedin.com/search/results/people?'
+        self.url_to_filter = 'https://linkedin.com/search/results/people?'
     
     def create_url(self, data):
         #Origins:
@@ -14,8 +14,8 @@ class UrlFilterGenerator():
         parameters_dict = {}
         parameters_dict['origin'] = 'FACETED_SEARCH'
         
-        if data['localidade'] != None:
-            parameters_dict['keywords'] = data['localidade']
+        # if data['localidade'] != None:
+        #     parameters_dict['keywords'] = data['localidade']
         
         if 'setores' in data:
             array_setores = []
@@ -25,10 +25,11 @@ class UrlFilterGenerator():
                     array_setores.append(setores_dict[setor])
             parameters_dict['facetIndustry'] = array_setores
             
-        if data['cargo'] != None:
-            parameters_dict['title'] = data['cargo']
+        # if data['cargo'] != None:
+        #     parameters_dict['title'] = data['cargo']
 
         url = self.url_to_filter + urllib.parse.urlencode(parameters_dict, quote_via=urllib.parse.quote).replace("%27", "\"")
+        print("\nUrl: {}".format(url))
         return url
     
     def next_page(self, page_filtered, page_number):
