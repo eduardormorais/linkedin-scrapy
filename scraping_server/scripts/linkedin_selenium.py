@@ -11,16 +11,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
-os.environ['email'] = 'tguzenski@yahoo.com.br'
-os.environ['senha'] = 'Eagorajose?'
-os.environ['api_key_zerobounce'] = '4d4f257126fd4f90be05ecc1a62a2541'
-
 class LinkedinSelenium(Resource):
     def __init__(self):
         self.login_url = "https://www.linkedin.com/login"
-        self.chrome_options = Options()
+        self.chrome_options = webdriver.ChromeOptions()
+        self.chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+        self.chrome_options.add_argument("--disable-dev-shm-usage")
+        self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--headless")
-        self.chrome_driver_path = "./chromedriver"
+        self.chrome_driver_path = os.environ.get("CHROMEDRIVER_PATH")
         self.url_filter_generator = UrlFilterGenerator()
 
     def sign_in(self, driver):
@@ -44,15 +43,21 @@ class LinkedinSelenium(Resource):
 
         return cookies
     
+    def get_chrome_options(self):
+        return self.chrome_options
+    
     def set_output_file(self, output_file):
         self.output_file = output_file
 
     def start_searching(self, valor_pesquisa):
+        print('Iniciando pesquisa...')
         chrome_driver = webdriver.Chrome(
-            executable_path=self.chrome_driver_path)
+            executable_path=self.chrome_driver_path, options=self.chrome_options)
         chrome_driver.get(self.login_url)
         cookies = self.read_session_cookies()
         for cookie in cookies:
+            if 'expiry' in cookie:
+                cookie['expiry'] = int(cookie['expiry'])
             chrome_driver.add_cookie(cookie)
 
         main_search_url = self.url_filter_generator.create_url(valor_pesquisa)
@@ -60,10 +65,12 @@ class LinkedinSelenium(Resource):
         next_page_number = 1
         search_url = main_search_url
         fixed_number_of_pages = 100
+        users_elements = []
         required_elements_json = ['included', 'navigationUrl', 'trackingUrn']
         while next_page_number <= fixed_number_of_pages: # Número de páginas que o script irá percorrer.
+            print('\n\npassando pela página: {}'.format(next_page_number))
             chrome_driver.get(search_url)
-            beautiful_soup = BeautifulSoup(chrome_driver.page_source, features="html5lib")
+            beautiful_soup = BeautifulSoup(chrome_driver.page_source)
             search_page_tags_code = beautiful_soup.find_all("code")
             for search_page_tag_code in search_page_tags_code:
                 if self.is_json(search_page_tag_code.text) == True:
@@ -71,11 +78,13 @@ class LinkedinSelenium(Resource):
                     if all(tag_element in str(search_data_tag_code) for tag_element in required_elements_json):
                         for elements_json in search_data_tag_code['data']['elements']:
                             if 'targetUrn' in str(elements_json):
+                                print('\nTargetURN encontrado!!')
                                 users_elements = elements_json['elements']
                                 break
                         break
             
             for user_element in users_elements:
+                print('\nLoop por cada elemento de usuário...')
                 if len(profile_users) == (valor_pesquisa['qtd']):
                     next_page_number = fixed_number_of_pages
                     break
@@ -83,6 +92,7 @@ class LinkedinSelenium(Resource):
                 chrome_driver.get(user_element['navigationUrl'])
                 profile_user = self.get_profile_data(chrome_driver.page_source)
                 if profile_user['empregado'] is True:
+                    print('\nUsário está empregado!')
                     chrome_driver.get(profile_user['empresa_linkedin_url'])
                     company_website_url = self.get_company_url(chrome_driver.page_source)
                     if company_website_url is not None:
@@ -95,20 +105,20 @@ class LinkedinSelenium(Resource):
             search_url = self.url_filter_generator.next_page(main_search_url, next_page_number)
 
         print(profile_users)
-        time.sleep(5)
+        chrome_driver.close()
         self.save_search_result(profile_users)
     
     def create_fake_mail(self, profile_user):
         first_name = unidecode.unidecode(profile_user['primeiroNome'].split(' ')[0].lower())
         last_name = unidecode.unidecode(profile_user['sobrenome'].split(' ')[0].lower())
-        profile_user['email'] = '{}.{}@{}'.format(first_name, last_name, profile_user['dominio_empresa'])
+        profile_user['email'] = '{}.{}{}'.format(first_name, last_name, profile_user['dominio_empresa'])
 
 
     def get_profile_data(self, html_page):
         profile_data = {}
         included_elements_user = {}
         required_elements_json = ['included', 'firstName', 'lastName', 'dateRange']
-        beautiful_soup = BeautifulSoup(html_page, features="html5lib")
+        beautiful_soup = BeautifulSoup(html_page)
         tags_code = beautiful_soup.find_all('code')
         for tag_code in tags_code:
             if self.is_json(tag_code.text) == True:
@@ -142,7 +152,7 @@ class LinkedinSelenium(Resource):
         company_url = ''
         included_elements_company = ''
         required_elements_json = ['data', 'meta', 'included', 'companyPageUrl', 'universalName']
-        beautiful_soup_company_page = BeautifulSoup(company_page, features="html5lib")
+        beautiful_soup_company_page = BeautifulSoup(company_page)
         tags_code = beautiful_soup_company_page.find_all('code')
         for tag_code in tags_code:
             if self.is_json(tag_code.text) == True:

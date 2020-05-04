@@ -1,5 +1,7 @@
 flask 
 flask-restful
+flask-cors
 selenium
 beautifulsoup4
 tldextract
+unidecode

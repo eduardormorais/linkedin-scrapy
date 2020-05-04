@@ -1,0 +1,1 @@
+web: sh -c 'cd scripts/ && python3.6 app.py'
