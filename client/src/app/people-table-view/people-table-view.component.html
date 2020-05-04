@@ -2,22 +2,22 @@
     <div class="ui-g-12">
         <div class="ui-g-3" >
             <span class="ui-float-label">
-                <input style="width: 97%;"[(ngModel)]="pesquisa.cargo" id="float-input" type="text" size="30" pInputText> 
+                <input style="width: 97%;"[(ngModel)]="pesquisa.cargo" id="float-input" type="text" size="30" pInputText>
                 <label for="float-input">Cargo</label>
             </span>
-        </div>      
+        </div>
         <div class="ui-g-3" >
             <span class="ui-float-label" style="float: right;">
-                <input style="width: 95%;" [(ngModel)]="pesquisa.localidade" id="float-input" type="text" size="30" pInputText> 
+                <input style="width: 95%;" [(ngModel)]="pesquisa.localidade" id="float-input" type="text" size="30" pInputText>
                 <label for="float-input">Localidade</label>
             </span>
-        </div>  
+        </div>
         <div class="ui-g-3" >
             <span class="ui-float-label" style="float: right;">
                 <p-spinner size="20" [(ngModel)]="pesquisa.qtd" [step]="10"></p-spinner>
                 <label for="float-input">Quatidade a pesquisar</label>
             </span>
-        </div> 
+        </div>
         <div class="ui-g-3" >
             <p-button [disabled]="atualizar" (click)="pesquisar()" [style]="{'width': '215px', 'margin-left' : '0%'}" icon="pi pi-search" label="Pesquisar"></p-button>
         </div>
@@ -40,7 +40,7 @@
     <p-table #dt [value] = "pessoas" dataKey="id" styleClass="ui-table-customers" [rowHover]="true"
     [rows]="5" [showCurrentPageReport]="true" [rowsPerPageOptions]="[5,10,25,50]"
     [paginator]="true" currentPageReportTemplate="{last} de {totalRecords} pessoas"
-    [filterDelay]="0" [globalFilterFields]="['primeiroNome','sobrenome','cargo','empresa','email']">
+    [filterDelay]="0" [globalFilterFields]="['primeiroNome','sobrenome','cargo','empresa','email', 'email_status']">
         <ng-template pTemplate="caption">
             Pessoas
             <div class="ui-table-globalfilter-container">
@@ -49,11 +49,12 @@
         </ng-template>
         <ng-template pTemplate="header">
             <tr>
-                <th pSortableColumn="primeiroNome">Nome <p-sortIcon field="primeiroNome"></p-sortIcon></th> 
-                <th pSortableColumn="sobrenome">Sobrenome <p-sortIcon field="sobrenome"></p-sortIcon></th> 
-                <th pSortableColumn="cargo">Cargo <p-sortIcon field="cargo"></p-sortIcon></th> 
-                <th pSortableColumn="empresa">Empresa <p-sortIcon field="empresa"></p-sortIcon></th> 
-                <th pSortableColumn="email">E-mail <p-sortIcon field="email"></p-sortIcon></th> 
+                <th pSortableColumn="primeiroNome">Nome <p-sortIcon field="primeiroNome"></p-sortIcon></th>
+                <th pSortableColumn="sobrenome">Sobrenome <p-sortIcon field="sobrenome"></p-sortIcon></th>
+                <th pSortableColumn="cargo">Cargo <p-sortIcon field="cargo"></p-sortIcon></th>
+                <th pSortableColumn="empresa">Empresa <p-sortIcon field="empresa"></p-sortIcon></th>
+                <th pSortableColumn="email_status">Status<p-sortIcon field="email_status"></p-sortIcon></th>
+                <th pSortableColumn="email">E-mail <p-sortIcon field="email"></p-sortIcon></th>
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-pessoa>
@@ -67,16 +68,19 @@
                 </td>
                 <td>
                     <span style="vertical-align: middle; margin-left: .5em">{{pessoa.cargo}}</span>
-                </td>                
+                </td>
                 <td>
                     <span style="vertical-align: middle; margin-left: .5em">{{pessoa.empresa}}</span>
+                </td>
+                <td>
+                  <div [class]="'customer-badge status-' + pessoa.email_status" >{{pessoa.email_status}}</div>
                 </td>
                 <td>
                     <span style="vertical-align: middle; margin-left: .5em">{{pessoa.email}}</span>
                 </td>
             </tr>
         </ng-template>
-    
+
         <ng-template pTemplate="emptymessage">
             <tr>
                 <td  style="width: 100%; height: 100%;" colspan="8" style="text-align:left">Pessoas não encontradas.</td>

@@ -26,15 +26,15 @@ export class PeopleTableViewService {
       }
     }
 
-    return this.http.post('https://linkedinscrapper-backend.herokuapp.com/api/pesquisa/', formData)
+    return this.http.post('api/pesquisa/', formData)
   }
 
   getSetores() {
-    return this.http.get('https://linkedinscrapper-backend.herokuapp.com/api/setores/')
+    return this.http.get('api/setores/')
   }
 
   getResultSearching(file) {
-    return this.http.get(`https://linkedinscrapper-backend.herokuapp.com/api/resultado/?fileName=${file}`)
+    return this.http.get(`api/resultado/?fileName=${file}`)
   }
 
 }

@@ -4,7 +4,7 @@ export class Pesquisa {
     constructor(
         public localidade?: string,
         public cargo?: string,
-        public qtd?: number,
-        public setores?: Setor[] 
+        public qtd = 10,
+        public setores?: Setor[]
     ) {}
 }

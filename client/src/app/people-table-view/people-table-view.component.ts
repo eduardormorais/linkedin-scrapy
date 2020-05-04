@@ -14,8 +14,8 @@ import {Setor} from './setor.model'
 export class PeopleTableViewComponent implements OnInit {
 
   pessoas:[]
-  pesquisa = new Pesquisa 
-  resultPesquisa:Pessoa[] 
+  pesquisa = new Pesquisa
+  resultPesquisa:Pessoa[]
   setores:Setor[]
   atualizar:boolean
 
@@ -23,18 +23,17 @@ export class PeopleTableViewComponent implements OnInit {
 
   ngOnInit(): void {
 
-    // this.pessoas = [
-    //   {primeiroNome: "Amy Elsner",cargo:'Analista de Requisitos' , email: 'amyelsner@gmail.com', image: 'amyelsner.png', localidade: 'Brasilia - DF' },
-    //   {primeiroNome: "Anna Fali",cargo:'Gerênte de Projetos', email: 'annafali@gmail.com', image: 'annafali.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "Asiya Javayant",cargo:'Programador', email: 'asiyajavayant@gmail.com', image: 'asiyajavayant.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "Bernardo Dominic",cargo:'Gerênte de Projetos', email: 'bernardodominic@gmail.com', image: 'bernardodominic.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "Elwin Sharvill",cargo:'Analista de Requisitos', email: 'elwinsharvill@gmail.com', image: 'elwinsharvill.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "Ioni Bowcher",cargo:'Programador', email: 'ionibowcher@gmail.com', image: 'ionibowcher.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "Ivan Magalhaes",cargo:'Gerênte de Projetos', email: 'ivanmagalhaes@gmail.com',image: 'ivanmagalhaes.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "Onyama Limba",cargo:'Programador', email: 'onyamalimba@gmail.com', image: 'onyamalimba.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "Stephen Shaw",cargo:'Programador', email: 'stephenshaw@gmail.com', image: 'stephenshaw.png', localidade: 'Brasilia - DF'},
-    //   {primeiroNome: "XuXue Feng",cargo:'Analista de Requisitos', email: 'xuxuefeng@gmail.com', image: 'xuxuefeng.png', localidade: 'Brasilia - DF'}
-    // ];
+    //  this.pessoas = [
+    //    {email_status:"Catch-All", primeiroNome: "Anna Fali",cargo:'Gerênte de Projetos', email: 'annafali@gmail.com', image: 'annafali.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Valid", primeiroNome: "Asiya Javayant",cargo:'Programador', email: 'asiyajavayant@gmail.com', image: 'asiyajavayant.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Invalid", primeiroNome: "Bernardo Dominic",cargo:'Gerênte de Projetos', email: 'bernardodominic@gmail.com', image: 'bernardodominic.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Invalid", primeiroNome: "Elwin Sharvill",cargo:'Analista de Requisitos', email: 'elwinsharvill@gmail.com', image: 'elwinsharvill.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Invalid", primeiroNome: "Ioni Bowcher",cargo:'Programador', email: 'ionibowcher@gmail.com', image: 'ionibowcher.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Valid", primeiroNome: "Ivan Magalhaes",cargo:'Gerênte de Projetos', email: 'ivanmagalhaes@gmail.commmmmmmmmmmmm',image: 'ivanmagalhaes.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Valid", primeiroNome: "Onyama Limba",cargo:'Programador', email: 'onyamalimba@gmail.com', image: 'onyamalimba.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Valid", primeiroNome: "Stephen Shaw",cargo:'Programador', email: 'stephenshaw@gmail.com', image: 'stephenshaw.png', localidade: 'Brasilia - DF'},
+    //    {email_status:"Catch-All", primeiroNome: "XuXue Feng",cargo:'Analista de Requisitos', email: 'xuxuefeng@gmail.com', image: 'xuxuefeng.png', localidade: 'Brasilia - DF'}
+    //  ];
 
     this.peopleTableService.getSetores().subscribe((resp:Setor[]) => {this.setores = resp; console.log(this.setores)})
   }
@@ -47,7 +46,7 @@ export class PeopleTableViewComponent implements OnInit {
         console.log(resp)
         file = resp
       })
-  
+
       interval(3000).pipe(
       switchMap(() => from(this.peopleTableService.getResultSearching(file))),
       takeWhile(((response: any ) => {
