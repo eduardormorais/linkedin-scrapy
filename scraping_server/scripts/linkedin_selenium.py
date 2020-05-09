@@ -116,7 +116,7 @@ class LinkedinSelenium(Resource):
     def start_searching(self, valor_pesquisa):
         self.logger.info('Iniciando pesquisa...')
         self.initialize_driver()
-        status, chrome_driver = self.is_authenticated()
+        status = self.is_authenticated()
         if status is True:
             main_search_url = self.url_filter_generator.create_url(valor_pesquisa)
             profile_users = []
@@ -125,8 +125,8 @@ class LinkedinSelenium(Resource):
             fixed_number_of_pages = 100
 
             while next_page_number <= fixed_number_of_pages: # Número de páginas que o script irá percorrer.
-                chrome_driver.get(search_url)
-                beautiful_soup = BeautifulSoup(chrome_driver.page_source)
+                self.chrome_driver.get(search_url)
+                beautiful_soup = BeautifulSoup(self.chrome_driver.page_source)
                 search_page_tags_code = beautiful_soup.find_all("code")
                 for search_page_tag_code in search_page_tags_code:
                     users_elements = self.get_users_elements(search_page_tag_code)
@@ -140,19 +140,19 @@ class LinkedinSelenium(Resource):
                         next_page_number = fixed_number_of_pages
                         break
 
-                    chrome_driver.get(user_element['navigationUrl'])
-                    profile_user = self.get_profile_data(chrome_driver.page_source)
+                    self.chrome_driver.get(user_element['navigationUrl'])
+                    profile_user = self.get_profile_data(self.chrome_driver.page_source)
 
                     if self.repeated_user(profile_users, profile_user) is True:
                         next_page_number = fixed_number_of_pages
                         break
 
                     if profile_user['empregado'] is True:
-                        self.append_users(profile_users, chrome_driver, profile_user)
+                        self.append_users(profile_users, self.chrome_driver, profile_user)
 
                 next_page_number += 1
                 search_url = self.url_filter_generator.next_page(main_search_url, next_page_number)
-            chrome_driver.close()
+            self.chrome_driver.close()
             self.save_search_result(profile_users)
     
     def repeated_user(self, profile_users, new_user):
