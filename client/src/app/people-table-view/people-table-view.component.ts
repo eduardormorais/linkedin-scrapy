@@ -51,7 +51,10 @@ export class PeopleTableViewComponent implements OnInit {
       switchMap(() => from(this.peopleTableService.getResultSearching(file))),
       takeWhile(((response: any ) => {
           this.atualizar = false
-          if (response === false){
+          if(response ===0 ){
+            this.atualizar=true
+          }else if(response.length < this.pesquisa.qtd){
+            this.pessoas = response
             this.atualizar=true
           }else{
             this.pessoas = response

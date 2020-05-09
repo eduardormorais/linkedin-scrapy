@@ -16,7 +16,7 @@ class ResultSearchWebHook(Resource):
             if(process_finish):
                 return self.get_file(file_name)    
             
-            return process_finish
+            return 0
         except Exception as e:
             print(e) 
             return 504

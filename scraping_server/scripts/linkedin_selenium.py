@@ -172,6 +172,8 @@ class LinkedinSelenium(Resource):
             profile_user['dominio_empresa'] = self.url_filter_generator.get_domain(company_website_url)
             self.create_email(profile_user)
             profile_users.append(profile_user)
+            self.save_search_result(profile_users)
+
 
     def get_profile_data(self, html_page):
         profile_data = {}
