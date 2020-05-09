@@ -6,6 +6,7 @@ from flask_restful import Resource
 from flask import request
 import logging
 import uuid
+from os import path
 from linkedin_selenium import LinkedinSelenium
 
 class SubprocessWebHook(Resource):

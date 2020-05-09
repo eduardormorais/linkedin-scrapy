@@ -14,19 +14,20 @@ class UrlFilterGenerator():
         parameters_dict = {}
         parameters_dict['origin'] = 'FACETED_SEARCH'
         
-        # if data['localidade'] != None:
-        #     parameters_dict['keywords'] = data['localidade']
+        if data['localidade'] != None:
+            parameters_dict['keywords'] = data['localidade']
         
         if 'setores' in data:
             array_setores = []
             setores_dict = self.read_setores_ids()
             for setor in data['setores']:
-                if setor in setores_dict:
-                    array_setores.append(setores_dict[setor])
+                for setor_dict in setores_dict:
+                    if setor in setor_dict['nome']:
+                        array_setores.append(setor_dict['id'])
             parameters_dict['facetIndustry'] = array_setores
             
-        # if data['cargo'] != None:
-        #     parameters_dict['title'] = data['cargo']
+        if data['cargo'] != None:
+            parameters_dict['title'] = data['cargo']
 
         url = self.url_to_filter + urllib.parse.urlencode(parameters_dict, quote_via=urllib.parse.quote).replace("%27", "\"")
         print("\nUrl: {}".format(url))

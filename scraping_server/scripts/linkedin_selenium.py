@@ -1,5 +1,7 @@
+
 import time
 import os
+from os import path
 import json
 import unidecode
 from flask_restful import Resource
@@ -7,19 +9,29 @@ from bs4 import BeautifulSoup
 from url_filter_generator import UrlFilterGenerator
 from selenium import webdriver
 import requests
+import logging
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 class LinkedinSelenium(Resource):
     def __init__(self):
+        self.logger = logging.getLogger("LinkedinSelenium")
+        self.logger.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
+        self.zerobounce_url = "https://api.zerobounce.net/v2/validate"
         self.login_url = "https://www.linkedin.com/login"
         self.chrome_options = webdriver.ChromeOptions()
         self.chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--no-sandbox")
-        self.chrome_options.add_argument("--headless")
-        self.chrome_driver_path = os.environ.get("CHROMEDRIVER_PATH")
+        # self.chrome_options.add_argument("--headless")
+        self.chrome_options.headless = False
+        self.chrome_driver_path = os.environ.get("CHROMEDRIVER_PATH", "./chromedriver")
         self.url_filter_generator = UrlFilterGenerator()
 
     def sign_in(self, driver):
@@ -31,9 +43,17 @@ class LinkedinSelenium(Resource):
         button_login = driver.find_elements_by_xpath(
             "//button[@type='submit']")[0]
         button_login.click()
+    
+    def set_code(self, chrome_driver, code):
+        pin = chrome_driver.find_element_by_name("pin")
+        pin.send_keys(code)
+        button_submit_pin = chrome_driver.find_elements_by_id("email-pin-submit-button")[0]
+        button_submit_pin.click()
+        if 'feed' in chrome_driver.current_url:
+            self.logger.info('Pin submitado, login bem-sucedido')
 
     def save_session_cookies(self, driver):
-        print('Salvando cookies...')
+        self.logger.info('Salvando cookies...')
         with open('cookies.json', 'w') as cookie_file:
             json.dump(driver.get_cookies(), cookie_file)
 
@@ -48,74 +68,112 @@ class LinkedinSelenium(Resource):
     
     def set_output_file(self, output_file):
         self.output_file = output_file
-
-    def start_searching(self, valor_pesquisa):
-        print('Iniciando pesquisa...')
-        chrome_driver = webdriver.Chrome(
-            executable_path=self.chrome_driver_path, options=self.chrome_options)
-        chrome_driver.get(self.login_url)
-        cookies = self.read_session_cookies()
-        for cookie in cookies:
-            if 'expiry' in cookie:
-                cookie['expiry'] = int(cookie['expiry'])
-            chrome_driver.add_cookie(cookie)
-
-        main_search_url = self.url_filter_generator.create_url(valor_pesquisa)
-        profile_users = []
-        next_page_number = 1
-        search_url = main_search_url
-        fixed_number_of_pages = 100
+    
+    def get_users_elements(self, page_content):
         users_elements = []
         required_elements_json = ['included', 'navigationUrl', 'trackingUrn']
-        while next_page_number <= fixed_number_of_pages: # Número de páginas que o script irá percorrer.
-            chrome_driver.get(search_url)
-            beautiful_soup = BeautifulSoup(chrome_driver.page_source)
-            search_page_tags_code = beautiful_soup.find_all("code")
-            for search_page_tag_code in search_page_tags_code:
-                if self.is_json(search_page_tag_code.text) == True:
-                    search_data_tag_code = json.loads(search_page_tag_code.text)
-                    if all(tag_element in str(search_data_tag_code) for tag_element in required_elements_json):
-                        for elements_json in search_data_tag_code['data']['elements']:
-                            if 'targetUrn' in str(elements_json):
-                                users_elements = elements_json['elements']
-                                break
+        if self.is_json(page_content.text) == True:
+            search_data_tag_code = json.loads(page_content.text)
+            if all(tag_element in str(search_data_tag_code) for tag_element in required_elements_json):
+                for element_json in search_data_tag_code['data']['elements']:
+                    if 'targetUrn' in str(element_json):
+                        users_elements = element_json['elements']
                         break
-                    
-            if len(users_elements) == 0: break
-            
-            for user_element in users_elements:
-                if len(profile_users) == (valor_pesquisa['qtd']):
-                    next_page_number = fixed_number_of_pages
-                    break
+        return users_elements
+    
+    def is_authenticated(self, chrome_driver):
+        logged = False
+        if path.exists('cookies.json'):
+            chrome_driver.get(self.login_url)
+            cookies = self.read_session_cookies()
+            for cookie in cookies:
+                if 'expiry' in cookie:
+                    cookie['expiry'] = int(cookie['expiry'])
+                chrome_driver.add_cookie(cookie)
+            chrome_driver.get(self.login_url)
+        else:
+            self.sign_in(chrome_driver)
 
-                chrome_driver.get(user_element['navigationUrl'])
-                profile_user = self.get_profile_data(chrome_driver.page_source)
-                
-                if self.repeated_user(profile_users, profile_user) is True:
-                    next_page_number = fixed_number_of_pages
-                    break
+        current_url = chrome_driver.current_url
+        if '/feed' in current_url:
+            self.logger.info('Rota /feed encontrada..')
+            self.save_session_cookies(chrome_driver)
+            logged = True
+        
+        if '/login' in current_url:
+            self.logger.info('/login encontrado.')
+            self.sign_in(chrome_driver)
+            self.save_session_cookies(chrome_driver)
+        
+        if '/check/challenge' in current_url:
+            self.logger.info('/challenge encontrado.')
+            logged = False
+        
+        return logged, chrome_driver
 
-                if profile_user['empregado'] is True:
-                    chrome_driver.get(profile_user['empresa_linkedin_url'])
-                    company_website_url = self.get_company_url(chrome_driver.page_source)
-                    if company_website_url is not None:
-                        profile_user['dominio_empresa'] = self.url_filter_generator.get_domain(company_website_url)
-                        self.create_email(profile_user)
-                        profile_users.append(profile_user)
+    def initialize_driver(self):
+        chrome_driver = webdriver.Chrome(executable_path=self.chrome_driver_path, options=self.chrome_options)
+        return chrome_driver      
 
-            next_page_number += 1
-            search_url = self.url_filter_generator.next_page(main_search_url, next_page_number)
-        chrome_driver.close()
-        self.save_search_result(profile_users)
+    def start_searching(self, valor_pesquisa):
+        self.logger.info('Iniciando pesquisa...')
+        chrome_driver = self.initialize_driver()
+        status, chrome_driver = self.is_authenticated(chrome_driver)
+        if status is True:
+            main_search_url = self.url_filter_generator.create_url(valor_pesquisa)
+            profile_users = []
+            next_page_number = 1
+            search_url = main_search_url
+            fixed_number_of_pages = 100
+
+            while next_page_number <= fixed_number_of_pages: # Número de páginas que o script irá percorrer.
+                chrome_driver.get(search_url)
+                beautiful_soup = BeautifulSoup(chrome_driver.page_source)
+                search_page_tags_code = beautiful_soup.find_all("code")
+                for search_page_tag_code in search_page_tags_code:
+                    users_elements = self.get_users_elements(search_page_tag_code)
+                    if len(users_elements) > 0:
+                        break
+
+                if len(users_elements) == 0: break
+
+                for user_element in users_elements:
+                    if len(profile_users) == (valor_pesquisa['qtd']):
+                        next_page_number = fixed_number_of_pages
+                        break
+
+                    chrome_driver.get(user_element['navigationUrl'])
+                    profile_user = self.get_profile_data(chrome_driver.page_source)
+
+                    if self.repeated_user(profile_users, profile_user) is True:
+                        next_page_number = fixed_number_of_pages
+                        break
+
+                    if profile_user['empregado'] is True:
+                        self.append_users(profile_users, chrome_driver, profile_user)
+
+                next_page_number += 1
+                search_url = self.url_filter_generator.next_page(main_search_url, next_page_number)
+            chrome_driver.close()
+            self.save_search_result(profile_users)
     
     def repeated_user(self, profile_users, new_user):
         repeated_user = False
-        for profile_user in profile_users:
-            if new_user['primeiroNome'] == profile_user['primeiroNome'] and new_user['sobrenome'] == profile_user['sobrenome']:
-                repeated_user = True
-                break
+        if 'primeiroNome' in new_user and 'sobrenome' in new_user:
+            for profile_user in profile_users:
+                if new_user['primeiroNome'] == profile_user['primeiroNome'] and new_user['sobrenome'] == profile_user['sobrenome']:
+                    repeated_user = True
+                    break
 
         return repeated_user
+    
+    def append_users(self, profile_users, chrome_driver, profile_user):
+        chrome_driver.get(profile_user['empresa_linkedin_url'])
+        company_website_url = self.get_company_url(chrome_driver.page_source)
+        if company_website_url is not None:
+            profile_user['dominio_empresa'] = self.url_filter_generator.get_domain(company_website_url)
+            self.create_email(profile_user)
+            profile_users.append(profile_user)
 
     def get_profile_data(self, html_page):
         profile_data = {}
@@ -149,7 +207,7 @@ class LinkedinSelenium(Resource):
                 if included_element['entityUrn'] == company_urn:
                     profile_data['empresa_linkedin_url'] = included_element['url']
             
-        print("\nProfile user: {}".format(profile_data))
+        self.logger.info("\nProfile user: {}".format(profile_data))
         return profile_data
     
     def get_company_url(self, company_page):
@@ -179,34 +237,41 @@ class LinkedinSelenium(Resource):
         return True
     
     def create_email(self, user_profile):
+        self.logger.info("Iniciando criação de e-mail.")
         email_address = ''
         name_variations = self.create_name_variations(user_profile)   
-        for name_variation in name_variations:
-            email_address = (name_variation + user_profile['dominio_empresa'])
-            response_email_status = self.connect_to_zerobounce(email_address)
-            user_profile['email'] = email_address
-            user_profile['email_status'] = response_email_status['status']
-            if response_email_status['status'] == "valid":
-                break
+        user_profile['email'] = "teste@gmail.com"
+        user_profile['email_status'] = "valid" 
+        # for name_variation in name_variations:
+        #     email_address = (name_variation + user_profile['dominio_empresa'])
+        #     response_email_status = self.connect_to_zerobounce(email_address)
+        #     user_profile['email'] = email_address
+        #     user_profile['email_status'] = response_email_status['status']
+        #     if response_email_status['status'] == "valid":
+        #         break
 
 
     def connect_to_zerobounce(self, email):
-        url = "https://api.zerobounce.net/v2/validate"
         params = {"email": email, "api_key": os.environ['api_key_zerobounce'], "ip_address": ''}
-        json_response = json.loads(requests.get(url, params=params).content)
-        print("\nEmail: {}.\nStatus: {}".format(email, json_response['status']))
+        json_response = json.loads(requests.get(self.zerobounce_url, params=params).content)
+        self.logger.info("\nEmail: {}.\nStatus: {}".format(email, json_response['status']))
         return json_response
 
     def save_search_result(self, search_response):
-        print('Pesquisa finalizando, salvando conteúdo em arquivo.')
+        self.logger.info('Pesquisa finalizada, salvando conteúdo em arquivo.')
         os.makedirs("files", exist_ok=True) 
         with open(f"files/{self.output_file}", 'w') as output_content_file:
             json.dump(search_response, output_content_file, ensure_ascii=False)
     
+    def delete_search_file(self, filename):
+        self.logger.info('Realizando exclusão de arquivo.')
+        os.makedirs("files", exist_ok=True)
+        os.remove(f"files/{filename}")
+        
     def create_name_variations(self, user_profile):
         name_variations = []
-        first_name = unidecode.unidecode(user_profile['primeiroNome'].split(' ')[0].lower())
-        last_name = unidecode.unidecode(user_profile['sobrenome'].split(' ')[0].lower())
+        first_name = (unidecode.unidecode(user_profile['primeiroNome'].split(' ')[0].lower())).replace(".", "")
+        last_name = (unidecode.unidecode(user_profile['sobrenome'].split(' ')[0].lower())).replace(".", "")
 
         name_variations.append('{}'.format(first_name))
         name_variations.append('{}{}'.format(first_name[0], last_name))
@@ -220,12 +285,6 @@ class LinkedinSelenium(Resource):
         name_variations.append('{}.{}'.format(first_name, last_name))
 
         return name_variations
-
-
-
-
-        
-
 
 
 

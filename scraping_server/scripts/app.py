@@ -13,14 +13,7 @@ import json, os
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
-if path.exists('cookies.json') is not True:
-    print('Realizando login para salvar os cookies.')
-    linkedin_selenium = LinkedinSelenium()
-    chrome_driver = webdriver.Chrome(executable_path=linkedin_selenium.chrome_driver_path, options=linkedin_selenium.get_chrome_options())
-    linkedin_selenium.sign_in(chrome_driver)
-    linkedin_selenium.save_session_cookies(chrome_driver)
-    chrome_driver.close()
-
+linkedin_selenium = LinkedinSelenium()
 api.add_resource(ResultSearchWebHook, '/api/resultado/')
 api.add_resource(SubprocessWebHook, '/api/pesquisa/')
 api.add_resource(SetoresWebHook, '/api/setores/')
@@ -29,6 +22,18 @@ api.add_resource(SetoresWebHook, '/api/setores/')
 def health_check():
     return 'application is running...'
 
+@app.route('/login', methods=['POST'])
+def sign_up():
+    chrome_driver = linkedin_selenium.initialize_driver()
+    status, chrome_driver = linkedin_selenium.is_authenticated(chrome_driver)
+    return dict(is_logged = status)
+
+@app.route('/set_code', methods=['POST'])
+def receive_user_code():
+    linkedin_selenium.set_code(chrome_driver, request.form.get('code'))
+    return 200
+
+
 port = os.environ.get('PORT', 5000)
 if __name__ == '__main__':
-    app.run(host= '0.0.0.0',port=port)
+    app.run(host= '0.0.0.0',port=port, debug=True)
