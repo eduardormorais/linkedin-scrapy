@@ -24,13 +24,13 @@ def health_check():
 
 @app.route('/login', methods=['POST'])
 def sign_up():
-    chrome_driver = linkedin_selenium.initialize_driver()
-    status, chrome_driver = linkedin_selenium.is_authenticated(chrome_driver)
-    return dict(is_logged = status)
+    linkedin_selenium.initialize_driver()
+    status = linkedin_selenium.is_authenticated()
+    return str(status)
 
 @app.route('/set_code', methods=['POST'])
 def receive_user_code():
-    linkedin_selenium.set_code(chrome_driver, request.form.get('code'))
+    linkedin_selenium.set_code(request.form.get('code'))
     return 200
 
 

@@ -14,6 +14,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
+os.environ['email'] = 'tguzenski@yahoo.com.br'
+os.environ['senha'] = 'Eagorajose?'
+os.environ['api_key_zerobounce'] = '4d4f257126fd4f90be05ecc1a62a2541'
+
 class LinkedinSelenium(Resource):
     def __init__(self):
         self.logger = logging.getLogger("LinkedinSelenium")
@@ -33,6 +37,7 @@ class LinkedinSelenium(Resource):
         self.chrome_options.headless = False
         self.chrome_driver_path = os.environ.get("CHROMEDRIVER_PATH", "./chromedriver")
         self.url_filter_generator = UrlFilterGenerator()
+        self.chrome_driver = None
 
     def sign_in(self, driver):
         driver.get(self.login_url)
@@ -44,12 +49,12 @@ class LinkedinSelenium(Resource):
             "//button[@type='submit']")[0]
         button_login.click()
     
-    def set_code(self, chrome_driver, code):
-        pin = chrome_driver.find_element_by_name("pin")
+    def set_code(self, code):
+        pin = self.chrome_driver.find_element_by_name("pin")
         pin.send_keys(code)
-        button_submit_pin = chrome_driver.find_elements_by_id("email-pin-submit-button")[0]
+        button_submit_pin = self.chrome_driver.find_elements_by_id("email-pin-submit-button")[0]
         button_submit_pin.click()
-        if 'feed' in chrome_driver.current_url:
+        if 'feed' in self.chrome_driver.current_url:
             self.logger.info('Pin submitado, login bem-sucedido')
 
     def save_session_cookies(self, driver):
@@ -81,44 +86,43 @@ class LinkedinSelenium(Resource):
                         break
         return users_elements
     
-    def is_authenticated(self, chrome_driver):
+    def is_authenticated(self):
         logged = False
         if path.exists('cookies.json'):
-            chrome_driver.get(self.login_url)
+            self.chrome_driver.get(self.login_url)
             cookies = self.read_session_cookies()
             for cookie in cookies:
                 if 'expiry' in cookie:
                     cookie['expiry'] = int(cookie['expiry'])
-                chrome_driver.add_cookie(cookie)
-            chrome_driver.get(self.login_url)
+                self.chrome_driver.add_cookie(cookie)
+            self.chrome_driver.get(self.login_url)
         else:
-            self.sign_in(chrome_driver)
+            self.sign_in(self.chrome_driver)
 
-        current_url = chrome_driver.current_url
+        current_url = self.chrome_driver.current_url
         if '/feed' in current_url:
             self.logger.info('Rota /feed encontrada..')
-            self.save_session_cookies(chrome_driver)
+            self.save_session_cookies(self.chrome_driver)
             logged = True
         
         if '/login' in current_url:
             self.logger.info('/login encontrado.')
-            self.sign_in(chrome_driver)
-            self.save_session_cookies(chrome_driver)
+            self.sign_in(self.chrome_driver)
+            self.save_session_cookies(self.chrome_driver)
         
         if '/check/challenge' in current_url:
             self.logger.info('/challenge encontrado.')
             logged = False
         
-        return logged, chrome_driver
+        return logged
 
     def initialize_driver(self):
-        chrome_driver = webdriver.Chrome(executable_path=self.chrome_driver_path, options=self.chrome_options)
-        return chrome_driver      
-
+        self.chrome_driver = webdriver.Chrome(executable_path=self.chrome_driver_path, options=self.chrome_options)
+        
     def start_searching(self, valor_pesquisa):
         self.logger.info('Iniciando pesquisa...')
-        chrome_driver = self.initialize_driver()
-        status, chrome_driver = self.is_authenticated(chrome_driver)
+        self.initialize_driver()
+        status, chrome_driver = self.is_authenticated()
         if status is True:
             main_search_url = self.url_filter_generator.create_url(valor_pesquisa)
             profile_users = []
