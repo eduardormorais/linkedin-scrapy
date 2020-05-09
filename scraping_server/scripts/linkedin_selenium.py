@@ -28,8 +28,7 @@ class LinkedinSelenium(Resource):
         self.chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--no-sandbox")
-        # self.chrome_options.add_argument("--headless")
-        self.chrome_options.headless = False
+        self.chrome_options.headless = True
         self.chrome_driver_path = os.environ.get("CHROMEDRIVER_PATH", "./chromedriver")
         self.url_filter_generator = UrlFilterGenerator()
         self.chrome_driver = None
