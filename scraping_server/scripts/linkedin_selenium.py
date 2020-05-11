@@ -240,15 +240,13 @@ class LinkedinSelenium(Resource):
         self.logger.info("Iniciando criação de e-mail.")
         email_address = ''
         name_variations = self.create_name_variations(user_profile)   
-        user_profile['email'] = "teste@gmail.com"
-        user_profile['email_status'] = "valid" 
-        # for name_variation in name_variations:
-        #     email_address = (name_variation + user_profile['dominio_empresa'])
-        #     response_email_status = self.connect_to_zerobounce(email_address)
-        #     user_profile['email'] = email_address
-        #     user_profile['email_status'] = response_email_status['status']
-        #     if response_email_status['status'] == "valid":
-        #         break
+        for name_variation in name_variations:
+            email_address = (name_variation + user_profile['dominio_empresa'])
+            response_email_status = self.connect_to_zerobounce(email_address)
+            user_profile['email'] = email_address
+            user_profile['email_status'] = response_email_status['status']
+            if response_email_status['status'] == "valid":
+                break
 
 
     def connect_to_zerobounce(self, email):
