@@ -11,6 +11,7 @@ import { HttpClientModule } from '@angular/common/http';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {InputTextModule} from 'primeng/inputtext';
 import {SpinnerModule} from 'primeng/spinner';
+import {ProgressBarModule} from 'primeng/progressbar';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import {SpinnerModule} from 'primeng/spinner';
     ReactiveFormsModule,
     InputTextModule,
     ListboxModule,
-    SpinnerModule
+    SpinnerModule,
+    ProgressBarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -159,6 +159,10 @@
     font-size: 12px;
 }
 
+:host ::ng-deep.ui-progressbar-determinate .ui-progressbar-label{
+  //background-color: #8BC34A;
+}
+
 .customer-badge {
   padding: .25em .5em;
   text-transform: uppercase;

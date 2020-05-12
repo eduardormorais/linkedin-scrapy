@@ -257,6 +257,7 @@ class LinkedinSelenium(Resource):
         #         break
 
 
+
     def connect_to_zerobounce(self, email):
         params = {"email": email, "api_key": os.environ['api_key_zerobounce'], "ip_address": ''}
         json_response = json.loads(requests.get(self.zerobounce_url, params=params).content)

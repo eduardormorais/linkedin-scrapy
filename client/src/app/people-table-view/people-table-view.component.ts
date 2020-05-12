@@ -18,7 +18,8 @@ export class PeopleTableViewComponent implements OnInit {
   resultPesquisa:Pessoa[]
   setores:Setor[]
   atualizar:boolean
-
+  qtdpessoas=0
+  progress:number
   constructor(private peopleTableService: PeopleTableViewService  ) { }
 
   ngOnInit(): void {
@@ -40,6 +41,8 @@ export class PeopleTableViewComponent implements OnInit {
 
   pesquisar(){
     if(!this.atualizar === true){
+      this.qtdpessoas = 0
+      this.progress = 0
       console.log(this.pesquisa)
       let file
       this.peopleTableService.searching(this.pesquisa).subscribe( resp => {
@@ -47,7 +50,7 @@ export class PeopleTableViewComponent implements OnInit {
         file = resp
       })
 
-      interval(3000).pipe(
+      interval(5000).pipe(
       switchMap(() => from(this.peopleTableService.getResultSearching(file))),
       takeWhile(((response: any ) => {
           this.atualizar = false
@@ -55,6 +58,10 @@ export class PeopleTableViewComponent implements OnInit {
             this.atualizar=true
           }else if(response.length < this.pesquisa.qtd){
             this.pessoas = response
+            this.qtdpessoas = this.pessoas.length
+
+            this.progress = (this.qtdpessoas * 100)/this.pesquisa.qtd
+
             this.atualizar=true
           }else{
             this.pessoas = response

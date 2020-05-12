@@ -32,11 +32,15 @@
 </div>
 
 <div class="ui-g-12" *ngIf="atualizar">
-    <h3 style="margin-left: 32%;">Pesquisando pessoas no Linkedin</h3>
-    <i class="pi pi-spin pi-spinner" style="font-size: 3em; margin-left: 45%;"></i>
+    <h3 style="margin-left: 30.5%;">Pesquisando pessoas no Linkedin {{qtdpessoas}} de {{pesquisa.qtd}}</h3>
+    <i class="pi pi-spin pi-spinner" style="font-size: 3em; margin-left: 47.5%;"></i>
 </div>
 
-<div class="ui-g-12" style="margin-top: 2%; width: 100%;" *ngIf="pessoas">
+<div class="ui-g-12" *ngIf="atualizar">
+  <p-progressBar [value]="progress" [style]="{'color': '#8BC34A'}"> </p-progressBar>
+</div>
+
+<div class="ui-g-12" style="margin-top: 2%; width: 100%;" *ngIf="qtdpessoas > 0">
     <p-table #dt [value] = "pessoas" dataKey="id" styleClass="ui-table-customers" [rowHover]="true"
     [rows]="5" [showCurrentPageReport]="true" [rowsPerPageOptions]="[5,10,25,50]"
     [paginator]="true" currentPageReportTemplate="{last} de {totalRecords} pessoas"
