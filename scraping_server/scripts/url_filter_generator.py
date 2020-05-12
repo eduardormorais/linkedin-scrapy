@@ -1,5 +1,4 @@
 import urllib
-from urllib.parse import urlparse
 import json
 import tldextract
 

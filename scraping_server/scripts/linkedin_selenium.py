@@ -1,4 +1,5 @@
 
+# -*- coding: utf-8 -*-
 import time
 import os
 from os import path
@@ -28,7 +29,7 @@ class LinkedinSelenium(Resource):
         self.chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
         self.chrome_options.add_argument("--no-sandbox")
-        self.chrome_options.headless = True
+        self.chrome_options.headless = False
         self.chrome_driver_path = os.environ.get("CHROMEDRIVER_PATH", "./chromedriver")
         self.url_filter_generator = UrlFilterGenerator()
         self.chrome_driver = None
@@ -64,6 +65,9 @@ class LinkedinSelenium(Resource):
     
     def get_chrome_options(self):
         return self.chrome_options
+    
+    def sleeping(self):
+        time.sleep(3)
     
     def set_output_file(self, output_file):
         self.output_file = output_file
@@ -125,7 +129,9 @@ class LinkedinSelenium(Resource):
             fixed_number_of_pages = 100
 
             while next_page_number <= fixed_number_of_pages: # Número de páginas que o script irá percorrer.
+                self.sleeping()
                 self.chrome_driver.get(search_url)
+                self.save_search_result(self.chrome_driver.current_url)
                 beautiful_soup = BeautifulSoup(self.chrome_driver.page_source)
                 search_page_tags_code = beautiful_soup.find_all("code")
                 for search_page_tag_code in search_page_tags_code:
@@ -153,8 +159,7 @@ class LinkedinSelenium(Resource):
                 next_page_number += 1
                 search_url = self.url_filter_generator.next_page(main_search_url, next_page_number)
             self.chrome_driver.close()
-            self.save_search_result(profile_users)
-    
+
     def repeated_user(self, profile_users, new_user):
         repeated_user = False
         if 'primeiroNome' in new_user and 'sobrenome' in new_user:
@@ -166,8 +171,10 @@ class LinkedinSelenium(Resource):
         return repeated_user
     
     def append_users(self, profile_users, chrome_driver, profile_user):
+        self.logger.info("\nSalvando array de usuários...")
         chrome_driver.get(profile_user['empresa_linkedin_url'])
         company_website_url = self.get_company_url(chrome_driver.page_source)
+        # self.sleeping()
         if company_website_url is not None:
             profile_user['dominio_empresa'] = self.url_filter_generator.get_domain(company_website_url)
             self.create_email(profile_user)
@@ -207,13 +214,12 @@ class LinkedinSelenium(Resource):
                 if included_element['entityUrn'] == company_urn:
                     profile_data['empresa_linkedin_url'] = included_element['url']
             
-        self.logger.info("\nProfile user: {}".format(profile_data))
         return profile_data
     
     def get_company_url(self, company_page):
         company_url = ''
         included_elements_company = ''
-        required_elements_json = ['data', 'meta', 'included', 'companyPageUrl', 'universalName']
+        required_elements_json = ['data', 'meta', 'included', 'companyPageUrl', 'universalName', 'callToAction']
         beautiful_soup_company_page = BeautifulSoup(company_page)
         tags_code = beautiful_soup_company_page.find_all('code')
         for tag_code in tags_code:
@@ -224,8 +230,10 @@ class LinkedinSelenium(Resource):
                     break
         
         for included_element_company in included_elements_company:
-            if 'companyPageUrl' in included_element_company and 'universalName' in included_element_company:
-                company_url = included_element_company['companyPageUrl']
+            call_to_action = ''
+            if 'companyPageUrl' in included_element_company and 'universalName' in included_element_company and 'callToAction' in included_element_company:
+                call_to_action = included_element_company['callToAction']
+                company_url = call_to_action['url']
         
         return company_url
 
@@ -240,8 +248,6 @@ class LinkedinSelenium(Resource):
         self.logger.info("Iniciando criação de e-mail.")
         email_address = ''
         name_variations = self.create_name_variations(user_profile)   
-        user_profile['email'] = "teste@gmail.com"
-        user_profile['email_status'] = "valid" 
         # for name_variation in name_variations:
         #     email_address = (name_variation + user_profile['dominio_empresa'])
         #     response_email_status = self.connect_to_zerobounce(email_address)
@@ -260,13 +266,13 @@ class LinkedinSelenium(Resource):
     def save_search_result(self, search_response):
         self.logger.info('Pesquisa finalizada, salvando conteúdo em arquivo.')
         os.makedirs("files", exist_ok=True) 
-        with open(f"files/{self.output_file}", 'w') as output_content_file:
+        with open('files/{}'.format(self.output_file), 'w') as output_content_file:
             json.dump(search_response, output_content_file, ensure_ascii=False)
     
     def delete_search_file(self, filename):
         self.logger.info('Realizando exclusão de arquivo.')
         os.makedirs("files", exist_ok=True)
-        os.remove(f"files/{filename}")
+        os.remove('files/{}'.format(filename))
         
     def create_name_variations(self, user_profile):
         name_variations = []

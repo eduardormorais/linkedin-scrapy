@@ -28,12 +28,4 @@ class ResultSearchWebHook(Resource):
         with open(f"files/{file_name}", "r") as arquivo_resultado:
             resultado = json.load(arquivo_resultado)
 
-        return resultado 
-              
-# if __name__ == "__main__":
-#     file_name = "request-14ec69f6c4be448898b5254b53d2edf6.json"
-#     with open(f"files/{file_name}", "r") as arquivo_resultado:
-#         resultado = json.load(arquivo_resultado)
-#         print(resultado)
-
-#     print(os.path.exists(f"files/{file_name}"))
+        return resultado
